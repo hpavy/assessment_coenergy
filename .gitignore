@@ -39,3 +39,6 @@ Icon
 # ── Env / secrets ──────────────────────────────
 .env
 .env.local
+
+# ── Local agent notes ─────────────────────────
+AGENT.local.md
