@@ -1,0 +1,8 @@
+run_name: ranker_vs_semantic
+
+seed: 42
+
+# above are no longer being evaluated on held-out data.
+val_rate: 0.1
+test_rate: 0.1
+

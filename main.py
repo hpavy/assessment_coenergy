@@ -1,9 +1,18 @@
-from coenergy.util_assessement import create_mock_package
+import torch
+import numpy as np
 
-
-def main():
-    print("Hello from hugo-assesement-coenergy!")
+from coenergy.utils import load_config, set_seed
+from coenergy.util_assessement import load_simulation_data
+from coenergy.dataset import split_data
 
 
 if __name__ == "__main__":
-    main()
+    config_path = "config.yaml"
+    config = load_config(config_path)
+    set_seed(config.seed)
+
+    data = load_simulation_data("data/")
+
+    dataset_train, dataset_val, dataset_test = split_data(data, config.val_rate, config.test_rate)
+
+    print("piche")
