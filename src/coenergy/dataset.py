@@ -9,10 +9,10 @@ from coenergy.util_assessement import ToSaveSimul
 @dataclass
 class NormStats:
     """Z-normalization statistics computed from the training split."""
-    temp_mean: torch.Tensor       # [T]
-    temp_std: torch.Tensor        # [T]
-    U_mean: torch.Tensor          # [T]
-    U_std: torch.Tensor           # [T]
+    temp_mean: torch.Tensor       # scalar (global mean for temperature)
+    temp_std: torch.Tensor        # scalar
+    U_mean: torch.Tensor          # scalar (global mean for solicitation)
+    U_std: torch.Tensor           # scalar
     Hb_mean: torch.Tensor         # [n_components]
     Hb_std: torch.Tensor          # [n_components]
     CDT_mean: torch.Tensor        # [3]
@@ -58,10 +58,10 @@ def _compute_stats(
 ) -> NormStats:
     """Compute Z-normalization statistics from a training split."""
     return NormStats(
-        temp_mean=indoor_temperature.mean(dim=0),
-        temp_std=indoor_temperature.std(dim=0),
-        U_mean=indoor_U.mean(dim=0),
-        U_std=indoor_U.std(dim=0),
+        temp_mean=indoor_temperature.mean(),
+        temp_std=indoor_temperature.std(),
+        U_mean=indoor_U.mean(),
+        U_std=indoor_U.std(),
         Hb_mean=Hb.mean(dim=0),
         Hb_std=Hb.std(dim=0),
         CDT_mean=CDT.mean(dim=0),
