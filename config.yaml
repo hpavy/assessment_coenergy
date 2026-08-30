@@ -1,8 +1,7 @@
-run_name: ranker_vs_semantic
+run_name: coenergy_assessment
 
 seed: 42
 
-# above are no longer being evaluated on held-out data.
+# Train / val / test split ratios
 val_rate: 0.1
 test_rate: 0.1
-

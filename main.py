@@ -13,6 +13,14 @@ if __name__ == "__main__":
 
     data = load_simulation_data("data/")
 
-    dataset_train, dataset_val, dataset_test = split_data(data, config.val_rate, config.test_rate)
+    dataset_train, dataset_val, dataset_test = split_data(
+        data, config.val_rate, config.test_rate, seed=config.seed
+    )
 
-    print("piche")
+    # Quick sanity check
+    x, y = dataset_train[0]
+    print(f"Train size : {len(dataset_train)}")
+    print(f"Val size   : {len(dataset_val)}")
+    print(f"Test size  : {len(dataset_test)}")
+    print(f"x shape    : {x.shape}  (2 channels, T timesteps)")
+    print(f"y shape    : {y.shape}  (Hb components + 3 CDT)")
