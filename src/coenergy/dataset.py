@@ -12,24 +12,22 @@ class QuentinDataset(Dataset):
             indoor_temperature: torch.Tensor,
             indoor_U: torch.Tensor,
             Hb: torch.Tensor,
+            normalize: bool 
             ):
        self.HLC = HLC
        self.CDT = CDT
        self.indoor_temperature = indoor_temperature
        self.indoor_U = indoor_U
        self.Hb = Hb 
+           
 
     def __len__(self) -> int:
         return self.HLC.shape[0]
 
-    def __getitem__(self, i: int) -> tuple[torch.Tensor]:
-        return (
-            self.HLC[i],
-            self.CDT[i, :],
-            self.indoor_temperature[i, :],
-            self.indoor_U[i, :],
-            self.Hb[i, :]
-        )
+    def __getitem__(self, i) -> tuple[torch.Tensor, torch.Tensor]:
+        x = torch.stack([self.indoor_temperature[i], self.indoor_U[i]])  # [2, T]
+        y = torch.cat([self.HLC[i].unsqueeze(0), self.Hb[i], self.CDT[i]])
+        return x, y
 
 
 def split_data(data: ToSaveSimul ,val_rate: float, test_rate: float) -> tuple[QuentinDataset]:
