@@ -1,1 +1,41 @@
+# ── Assessment PDF ─────────────────────────────
 Assessment_de_stage___coEnergy.pdf
+
+# ── Data (simulation batches) ──────────────────
+data/
+*.pt
+
+# ── uv / Python ────────────────────────────────
+.venv/
+.uv-cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+build/
+dist/
+develop
+
+# ── Jupyter ───────────────────────────────────
+.ipynb_checkpoints/
+
+# ── macOS ──────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Editors ────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Env / secrets ──────────────────────────────
+.env
+.env.local
