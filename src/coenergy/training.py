@@ -1,54 +1,89 @@
-from box import Box 
-from torch import optim
-from torch.utils.data import Dataset, DataLoader 
+from box import Box
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, Dataset
 
-def train_loop(model, dataset_train, dataset_val, optimizer: optim, config: Box):
-    data = data.to(config.device)
-    model.eval()
-    loss_target, loss_target_rmse = compute_target_loss(
-        model, data, O_training,  O_target, loss, loss_rmse, config
-        )
-    log.info(f"Step 0: target: {loss_target:.1e} - target predict: {loss_target_rmse:.1e}")
+from coenergy.evaluate import evaluate
 
-    # Initialize best score for checkpointing
-    best_test_rmse = float('inf')
 
-    data_training_init = data * O_training
-    for i in range(1, config.n_epoch + 1):
+def train_loop(
+    model: nn.Module,
+    train_ds: Dataset,
+    val_ds: Dataset,
+    optimizer: torch.optim.Optimizer,
+    config: Box,
+) -> dict:
+    """Run the training loop and return history + final metrics.
+
+    Args:
+        model: The neural network model
+        train_ds: Training dataset
+        val_ds: Validation dataset
+        optimizer: Initialized optimizer
+        config: Configuration object with training params
+
+    Returns:
+        best_weights: the best weights of the model
+        dict: Contains 'history' (train/val loss per epoch) and 'metrics' (final EvalMetrics)
+    """
+    device = config.device
+    model = model.to(device)
+    criterion = nn.MSELoss()
+
+
+    train_loader = DataLoader(train_ds, batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=config.batch_size, shuffle=False)
+
+    history = {"train_loss": [], "val_loss": []}
+    best_val_loss = float('inf')
+    best_weights = None
+
+    for epoch in range(config.epochs):
+
+        # --- Validation phase ---
+        model.eval()
+        val_loss = 0.0
+        all_preds = []
+        all_targets = []
+
+        with torch.no_grad():
+            for x, y in val_loader:
+                x, y = x.to(device), y.to(device)
+                pred = model(x)
+                val_loss += criterion(pred, y).item() * x.size(0)
+                all_preds.append(pred.cpu())
+                all_targets.append(y.cpu())
+
+        val_loss /= len(val_ds)
+
+       # Check if this is the best model so far
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_weights = model.state_dict().copy()  # Save a copy of the weights
+            print(f"  -> New best model saved (val_loss: {val_loss:.4f})")
+
+
+
+        # --- Training phase ---
         model.train()
-        data_training = data_training_init.clone()
-        loss_dir_row, loss_dir_col, loss_reg = loss(model(data_training), data * (O_training + O_target))
-        loss_train = float(config.gamma)/2*(loss_dir_row + loss_dir_col) + loss_reg
-        loss_train.backward()
-        optimizer.step()
-        optimizer.zero_grad()
+        train_loss = 0.0
 
-        # --- TENSORBOARD: Log Training Loss ---
-        if writer:
-            writer.add_scalar('Loss/Train_Total', loss_train.item(), i)
-            writer.add_scalar('Loss/Train_Reg_Frob', loss_reg.item(), i)
-            writer.add_scalar('Loss/Train_Dirichlet', (loss_dir_row + loss_dir_col).item(), i)
+        for x, y in train_loader:
+            x, y = x.to(device), y.to(device)
 
-        if i % config.log_each == 0:
-            loss_test, loss_test_rmse = compute_target_loss(
-                model, data, O_training, O_test, loss, loss_rmse, config
-                )
+            optimizer.zero_grad()
+            pred = model(x)
+            loss = criterion(pred, y)
+            loss.backward()
+            optimizer.step()
 
-            # --- TENSORBOARD: Log Test Metrics ---
-            if writer:
-                writer.add_scalar('Loss/Test_Total', loss_test.item(), i)
-                writer.add_scalar('Metric/RMSE', loss_test_rmse.item(), i)
+            train_loss += loss.item() * x.size(0)
 
-            log.info(
-                f"Step {i}: train: {loss_train.item():.1e} - test: {loss_test:.1e}"
-                f" - test predict: {loss_test_rmse:.1e} - dirich row: {loss_dir_row:.1e}"
-                f" - dirich col: {loss_dir_col:.1e} - reg_froeb {loss_reg:.1e}"
-                )
+        train_loss /= len(train_ds)
 
-            # --- CHECKPOINTING: Save Best Model ---
-            # We save only if the current test RMSE is lower than the best seen so far
-            if loss_test_rmse < best_test_rmse:
-                best_test_rmse = loss_test_rmse
-                save_path = os.path.join(config.output_dir, "best_model.pth")
-                torch.save(model.state_dict(), save_path)
-                log.info(f" New best model saved (RMSE: {best_test_rmse:.4f}) at step {i}")
+
+        history["train_loss"].append(train_loss)
+        history["val_loss"].append(val_loss)
+        print(f"Epoch {epoch + 1}/{config.epochs} — train: {train_loss:.4f} | val: {val_loss:.4f}")
+
+    return best_weights, history

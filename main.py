@@ -19,19 +19,6 @@ if __name__ == "__main__":
         data, config.val_rate, config.test_rate, seed=config.seed
     )
 
-    model = load_model(
-        input_dim=dataset_train[0][0].flatten().shape[0],
-        n_outputs=len(dataset_train[0][1]),
-        config=config
-        )
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
-
-    try:
-        model_dict = train_loop(model, dataset_train, dataset_val, optimizer, config)
-    except KeyboardInterrupt:
-        print("Training interrupted by user.")
-
-
     # Quick sanity check
     x, y = dataset_train[0]
     print(f"Train size : {len(dataset_train)}")
@@ -39,3 +26,17 @@ if __name__ == "__main__":
     print(f"Test size  : {len(dataset_test)}")
     print(f"x shape    : {x.shape}  (2 channels, T timesteps)")
     print(f"y shape    : {y.shape}  (Hb components + 3 CDT)")
+
+    model = load_model(
+        input_dim=dataset_train[0][0].flatten().shape[0],
+        n_outputs=len(dataset_train[0][1]),
+        config=config
+        )
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+
+    best_weights, losses = train_loop(model, dataset_train, dataset_val, optimizer, config)
+
+    model.load_state_dict(best_weights)
+    print("Restored best model weights for final evaluation.")
+
+    
