@@ -6,6 +6,7 @@ from coenergy.util_assessement import load_simulation_data
 from coenergy.dataset import split_data
 from coenergy.training import train_loop
 from coenergy.model import load_model
+from coenergy.evaluate import evaluate, predict_eval
 
 
 if __name__ == "__main__":
@@ -39,4 +40,7 @@ if __name__ == "__main__":
     model.load_state_dict(best_weights)
     print("Restored best model weights for final evaluation.")
 
-    
+    y_pred, y_true = predict_eval(model, dataset_test, config.batch_size, config.device)
+
+    test_metrics = evaluate(y_pred, y_true, dataset_train.stats, dataset_train.Hb.shape[1])
+    print(f"\nTest Metrics:\n{test_metrics}")

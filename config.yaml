@@ -12,13 +12,7 @@ hidden_dim: 256
 nb_hidden: 2
 
 # Training configuration
-epochs: 20
+epochs: 2
 batch_size: 256
 lr: 0.001
 device: mps             # options: "cpu", "mps", "cuda"
-
-
-# for the simple mlp
-
-mlp_hidden_dim: 256
-mlp_nb_hidden: 2

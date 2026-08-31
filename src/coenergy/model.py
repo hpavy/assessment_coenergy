@@ -7,8 +7,8 @@ def load_model(config: Box, input_dim: int, n_outputs: int) -> nn.Module:
         return SimpleMLP(
             input_dim,
             n_outputs,
-            config.mlp_hidden_dim,
-            config.mlp_nb_hidden
+            config.hidden_dim,
+            config.nb_hidden
         )
 
 

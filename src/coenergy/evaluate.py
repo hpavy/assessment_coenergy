@@ -8,6 +8,8 @@ All metrics are computed in real physical units (denormalized).
 
 from dataclasses import dataclass
 import torch
+import torch.nn as nn
+from torch.utils.data import Dataset
 
 from coenergy.dataset import NormStats
 
@@ -128,3 +130,33 @@ def evaluate(
         r2_tau_n=r2_tau_n,
         r2_tau_inf=r2_tau_inf,
     )
+
+
+def predict_eval(
+        model: nn.Module,
+        dataset_test: Dataset, 
+        batch_size: int, 
+        device: str
+        ):
+    # --- Final evaluation on the Test dataset ---
+    from torch.utils.data import DataLoader
+    from coenergy.evaluate import evaluate
+
+    model = model.to(device)
+    model.eval()
+
+    test_loader = DataLoader(dataset_test, batch_size=batch_size, shuffle=False)
+    all_preds = []
+    all_targets = []
+
+    print("\nEvaluating on test set...")
+    with torch.no_grad():
+        for x, y in test_loader:
+            x, y = x.to(device), y.to(device)
+            pred = model(x)
+            all_preds.append(pred.cpu())
+            all_targets.append(y.cpu())
+
+    y_pred = torch.cat(all_preds)
+    y_true = torch.cat(all_targets)
+    return y_pred, y_true 
