@@ -59,7 +59,7 @@ Une recherche automatique sur 20 configurations a été effectuée pour trouver 
 |---|---|---|---|---|---|---|---|---|---|---|
 | Test | 20.669 | 10.505 | 7.609 | 1.447 | 5.691 | 0.320 | 0.156 | 0.082 | 0.160 | 0.069 |
 
-## Neural Network
+## Neural Network (MLP)
 
 Pour capturer les non-linéarités, un réseau de neurones simple (Multi-Layer Perceptron - MLP) a été implémenté. Il aplatit les séries temporelles et les fait passer à travers des couches linéaires avec des activations ReLU.
 
@@ -70,6 +70,36 @@ Une recherche automatique sur 20 configurations a permis d'identifier la meilleu
 | Test | 20.619 | 10.773 | 7.609 | 1.431 | 5.702 | 0.319 | 0.122 | 0.085 | 0.181 | 0.069 |
 
 **Analyse** : Le MLP n'améliore pas la régression linéaire de façon significative — R² HLC 0.319 contre 0.320 pour le modèle linéaire. Aplatir la série temporelle détruit la structure temporelle, mais ce n'est pas la seule limite.
+
+## CNN — meilleur modèle
+
+Le MLP aplatit la série temporelle, ce qui détruit la structure temporelle. Un CNN 1D dilaté (`DilatedCNN`) la préserve. Choix d'architecture :
+
+- **Stem convolutif à pas de 2 (×2)** : sous-échantillonne la séquence de 600 à 150 pas. Les cibles sont un gain statique et des constantes de temps en heures : la résolution au pas de temps ne porte pas de signal utile, et le réseau devient 4× moins coûteux. Un `MaxPool` a été écarté car il ne conserve que l'enveloppe supérieure d'une trace de température, en jetant la décroissance qui détermine justement les constantes de temps.
+- **6 blocs résiduels à dilatation doublante (1 → 32)** : champ réceptif d'environ 1024 pas pour T = 600, donc chaque sortie voit la réponse entière. Indispensable pour τ_inf, dont l'ordre de grandeur atteint plusieurs dizaines d'heures.
+- **Pooling global moyenne + max** au lieu du dernier pas de temps : le HLC est essentiellement un gain moyen sur la réponse. Le pooling moyen peut exprimer cette grandeur, un unique pas de temps final ne peut pas.
+- **Pas de récurrence** : le réseau traite toute la séquence en parallèle. 0.19 M paramètres contre 1.41 M pour le MLP, soit 7× moins, et environ 25 ms par batch de 512.
+
+| Métrique | MAE HLC (W/K) | MAE Hb (W/K) | MAE τ_b (h) | MAE τ_n (h) | MAE τ_inf (h) | R² HLC | R² Hb | R² τ_b | R² τ_n | R² τ_inf |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Test | 19.541 | 10.203 | 7.333 | 1.390 | 5.554 | 0.390 | 0.190 | 0.145 | 0.228 | 0.110 |
+
+### Comparaison des modèles (test, jeu complet)
+
+Toutes les valeurs sont des MAE en unités physiques réelles (W/K et heures) — plus bas est meilleur.
+
+| Modèle | MAE HLC (W/K) | MAE Hb (W/K) | MAE τ_b (h) | MAE τ_n (h) | MAE τ_inf (h) | MAE totale |
+|---|---|---|---|---|---|---|
+| Constant (moyenne) | 25.231 | 11.841 | 7.941 | 1.579 | 5.896 | 52.488 |
+| Régression linéaire | 20.669 | 10.505 | 7.609 | 1.447 | 5.691 | 45.921 |
+| MLP | 20.619 | 10.773 | 7.609 | 1.431 | 5.702 | 46.134 |
+| **CNN dilaté** | **19.541** | **10.203** | **7.333** | **1.390** | **5.554** | **44.022** |
+
+**Analyse** : le CNN dilaté est le meilleur modèle sur les cinq cibles simultanément. Il réduit la MAE totale de 1.899 (4.1 %) par rapport à la régression linéaire, et de 2.112 (4.6 %) par rapport au MLP. Sur le HLC, l'erreur passe de 20.669 à 19.541 W/K.
+
+Il faut garder la mesure juste : le gain est réel et systématique, mais il reste modeste en valeur absolue. Le CNN se situe à 23 % sous le prédicteur constant sur le HLC, là où la régression linéaire était déjà à 18 %. Autrement dit, l'architecture capture une part de non-linéarité que les modèles précédents manquaient, sans faire basculer le problème.
+
+Le MLP, lui, n'apporte rien sur la régression linéaire (MAE totale 46.134 contre 45.921) : aplatir la série temporelle détruit la structure que le CNN exploite.
 
 
 ## Structure du projet
@@ -83,7 +113,7 @@ Une recherche automatique sur 20 configurations a permis d'identifier la meilleu
 │   ├── util_assessement.py     # Loader fourni par coEnergy
 │   ├── dataset.py              # QuentinDataset, split_data, Normalisation
 │   ├── evaluate.py             # Métriques (MAE, R²) dans les unités physiques
-│   ├── model.py                # Définition des modèles (SimpleMLP)
+│   ├── model.py                # Définition des modèles (SimpleMLP, DilatedCNN)
 │   ├── training.py             # Boucle d'entraînement (AMP, best weights)
 │   ├── baseline_constant.py    # Baseline 1 (Moyenne)
 │   ├── baseline_linear.py      # Baseline 2 (Régression linéaire)

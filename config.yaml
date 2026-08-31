@@ -7,7 +7,7 @@ val_rate: 0.1
 test_rate: 0.1
 
 # Model configuration
-model_type: cnn
+model_type: cnn            # options: "mlp", "cnn"
 
 # for the simple mlp
 mlp_hidden_dim: 512
