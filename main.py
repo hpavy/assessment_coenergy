@@ -1,12 +1,13 @@
 import torch
 import numpy as np
 
-from coenergy.utils import load_config, set_seed
+from coenergy.utils import load_config, set_seed, save_results
 from coenergy.util_assessement import load_simulation_data
 from coenergy.dataset import split_data
 from coenergy.training import train_loop
 from coenergy.model import load_model
 from coenergy.evaluate import evaluate, predict_eval
+
 
 
 if __name__ == "__main__":
@@ -44,3 +45,4 @@ if __name__ == "__main__":
 
     test_metrics = evaluate(y_pred, y_true, dataset_train.stats, dataset_train.Hb.shape[1])
     print(f"\nTest Metrics:\n{test_metrics}")
+    save_results(losses, test_metrics, output_dir=f"output/{config.run_name}")
