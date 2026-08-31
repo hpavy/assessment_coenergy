@@ -4,6 +4,8 @@ import numpy as np
 from coenergy.utils import load_config, set_seed
 from coenergy.util_assessement import load_simulation_data
 from coenergy.dataset import split_data
+from coenergy.training import train_loop
+from coenergy.model import load_model
 
 
 if __name__ == "__main__":
@@ -16,6 +18,14 @@ if __name__ == "__main__":
     dataset_train, dataset_val, dataset_test = split_data(
         data, config.val_rate, config.test_rate, seed=config.seed
     )
+
+    model = load_model(config)
+
+    try:
+        model_dict = train_loop(model, dataset_train, dataset_val, optimizer, config)
+    except KeyboardInterrupt:
+        print("Training interrupted by user.")
+
 
     # Quick sanity check
     x, y = dataset_train[0]

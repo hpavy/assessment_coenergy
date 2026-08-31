@@ -5,3 +5,9 @@ seed: 42
 # Train / val / test split ratios
 val_rate: 0.1
 test_rate: 0.1
+
+
+# for the simple mlp
+
+mlp_hidden_dim: 256
+mlp_nb_hidden: 2
