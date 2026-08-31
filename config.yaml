@@ -1,4 +1,4 @@
-run_name: coenergy_assessment
+run_name: simple_mlp
 
 seed: 42
 
@@ -8,11 +8,11 @@ test_rate: 0.1
 
 # Model configuration
 model_type: mlp               # options: "mlp", "cnn_gru"
-hidden_dim: 256
-nb_hidden: 2
+hidden_dim: 512
+nb_hidden: 4
 
 # Training configuration
-epochs: 2
-batch_size: 256
-lr: 0.001
+epochs: 20
+batch_size: 512 
+lr: 0.0005
 device: mps             # options: "cpu", "mps", "cuda"

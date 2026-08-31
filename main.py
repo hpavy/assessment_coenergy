@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 
 from coenergy.utils import load_config, set_seed, save_results
 from coenergy.util_assessement import load_simulation_data
