@@ -84,6 +84,11 @@ Le MLP aplatit la série temporelle, ce qui détruit la structure temporelle. Un
 |---|---|---|---|---|---|---|---|---|---|---|
 | Test | 19.541 | 10.203 | 7.333 | 1.390 | 5.554 | 0.390 | 0.190 | 0.145 | 0.228 | 0.110 |
 
+### Courbe d'apprentissage
+
+![Loss CNN](assets/cnn_loss.png)
+
+
 ### Comparaison des modèles (test, jeu complet)
 
 Toutes les valeurs sont des MAE en unités physiques réelles (W/K et heures) — plus bas est meilleur.
@@ -106,6 +111,7 @@ Le MLP, lui, n'apporte rien sur la régression linéaire (MAE totale 46.134 cont
 
 ```
 .
+├── assets/                     # Figures du README
 ├── data/                       # Jeu de données (batch_*.pt) - non versionné
 ├── output/                     # Résultats d'entraînement (loss, metrics) - non versionné
 ├── src/coenergy/               # Bibliothèque principale (package installable)
@@ -114,6 +120,7 @@ Le MLP, lui, n'apporte rien sur la régression linéaire (MAE totale 46.134 cont
 │   ├── dataset.py              # QuentinDataset, split_data, Normalisation
 │   ├── evaluate.py             # Métriques (MAE, R²) dans les unités physiques
 │   ├── model.py                # Définition des modèles (SimpleMLP, DilatedCNN)
+│   ├── plotting.py             # Courbes de perte
 │   ├── training.py             # Boucle d'entraînement (AMP, best weights)
 │   ├── baseline_constant.py    # Baseline 1 (Moyenne)
 │   ├── baseline_linear.py      # Baseline 2 (Régression linéaire)
