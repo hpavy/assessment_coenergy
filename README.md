@@ -8,6 +8,7 @@
     - [2. Régression Linéaire](#2-régression-linéaire)
   - [Neural Network](#neural-network)
   - [Structure du projet](#structure-du-projet)
+  - [Comment exécuter le code](#comment-exécuter-le-code)
 
 ## Méthodologie & Traitement des données
 
@@ -56,7 +57,7 @@ Une recherche automatique sur 20 configurations a été effectuée pour trouver 
 
 | Métrique | MAE HLC (W/K) | MAE Hb (W/K) | MAE τ_b (h) | MAE τ_n (h) | MAE τ_inf (h) | R² HLC | R² Hb | R² τ_b | R² τ_n | R² τ_inf |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Test | 20.669 | 10.505 | 7.609 | 1.447 | 5.691 | 0.320 | 0.865 | 0.082 | 0.160 | 0.069 |
+| Test | 20.669 | 10.505 | 7.609 | 1.447 | 5.691 | 0.320 | 0.156 | 0.082 | 0.160 | 0.069 |
 
 ## Neural Network
 
@@ -66,16 +67,16 @@ Une recherche automatique sur 20 configurations a permis d'identifier la meilleu
 
 | Métrique | MAE HLC (W/K) | MAE Hb (W/K) | MAE τ_b (h) | MAE τ_n (h) | MAE τ_inf (h) | R² HLC | R² Hb | R² τ_b | R² τ_n | R² τ_inf |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Test | 20.690 | 10.778 | 7.618 | 1.443 | 5.712 | 0.315 | 0.858 | 0.082 | 0.175 | 0.066 |
+| Test | 20.619 | 10.773 | 7.609 | 1.431 | 5.702 | 0.319 | 0.122 | 0.085 | 0.181 | 0.069 |
 
-**Analyse** : Le MLP parvient à améliorer légèrement la prédiction des constantes de temps (τ_n passe de 0.160 à 0.175 en R²), mais peine à améliorer le HLC par rapport à la régression linéaire. Cela indique que l'aplatissement de la série temporelle détruit une partie de l'information temporelle cruciale, justifiant l'utilisation d'architectures plus complexes (comme les CNN 1D).
+**Analyse** : Le MLP n'améliore pas la régression linéaire de façon significative — R² HLC 0.319 contre 0.320 pour le modèle linéaire. Aplatir la série temporelle détruit la structure temporelle, mais ce n'est pas la seule limite.
+
 
 ## Structure du projet
 
 ```
 .
 ├── data/                       # Jeu de données (batch_*.pt) - non versionné
-├── notebooks/                  # Notebooks d'analyse et pipeline final
 ├── output/                     # Résultats d'entraînement (loss, metrics) - non versionné
 ├── src/coenergy/               # Bibliothèque principale (package installable)
 │   ├── __init__.py

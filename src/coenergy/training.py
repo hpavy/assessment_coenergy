@@ -1,3 +1,5 @@
+import copy
+
 from box import Box
 import torch
 import torch.nn as nn
@@ -40,30 +42,6 @@ def train_loop(
 
     for epoch in range(config.epochs):
 
-        # --- Validation phase ---
-        model.eval()
-        val_loss = 0.0
-        all_preds = []
-        all_targets = []
-
-        with torch.no_grad():
-            for x, y in val_loader:
-                x, y = x.to(device), y.to(device)
-                pred = model(x)
-                val_loss += criterion(pred, y).item() * x.size(0)
-                all_preds.append(pred.cpu())
-                all_targets.append(y.cpu())
-
-        val_loss /= len(val_ds)
-
-       # Check if this is the best model so far
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_weights = model.state_dict().copy()  # Save a copy of the weights
-            print(f"  -> New best model saved (val_loss: {val_loss:.4f})")
-
-
-
         # --- Training phase ---
         model.train()
         train_loss = 0.0
@@ -80,6 +58,24 @@ def train_loop(
             train_loss += loss.item() * x.size(0)
 
         train_loss /= len(train_ds)
+
+        # --- Validation phase ---
+        model.eval()
+        val_loss = 0.0
+
+        with torch.no_grad():
+            for x, y in val_loader:
+                x, y = x.to(device), y.to(device)
+                pred = model(x)
+                val_loss += criterion(pred, y).item() * x.size(0)
+
+        val_loss /= len(val_ds)
+
+        # Check if this is the best model so far
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_weights = copy.deepcopy(model.state_dict())
+            print(f"  -> New best model saved (val_loss: {val_loss:.4f})")
 
 
         history["train_loss"].append(train_loss)

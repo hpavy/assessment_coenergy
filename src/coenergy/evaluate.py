@@ -113,7 +113,9 @@ def evaluate(
 
     # Compute R² in real units
     r2_hlc = _r2(HLC_pred, HLC_true).item()
-    r2_hb_avg = _r2(Hb_pred, Hb_true).mean().item()  # average R² across components
+    r2_hb_avg = torch.stack(
+        [_r2(Hb_pred[:, i], Hb_true[:, i]) for i in range(n_hb_components)]
+    ).mean().item()
     r2_tau_b = _r2(CDT_pred[:, 0], CDT_true[:, 0]).item()
     r2_tau_n = _r2(CDT_pred[:, 1], CDT_true[:, 1]).item()
     r2_tau_inf = _r2(CDT_pred[:, 2], CDT_true[:, 2]).item()

@@ -1,4 +1,4 @@
-run_name: simple_mlp
+run_name: cnn
 
 seed: 42
 
@@ -7,9 +7,17 @@ val_rate: 0.1
 test_rate: 0.1
 
 # Model configuration
-model_type: mlp               # options: "mlp", "cnn_gru"
-hidden_dim: 512
-nb_hidden: 4
+model_type: cnn
+
+# for the simple mlp
+mlp_hidden_dim: 512
+mlp_nb_hidden: 4
+
+# for the dilated cnn
+cnn_channels: 64
+cnn_blocks: 6
+cnn_kernel_size: 3
+cnn_head_hidden: 128
 
 # Training configuration
 epochs: 20
