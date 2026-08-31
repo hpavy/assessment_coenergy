@@ -6,6 +6,17 @@ seed: 42
 val_rate: 0.1
 test_rate: 0.1
 
+# Model configuration
+model_type: mlp               # options: "mlp", "cnn_gru"
+hidden_dim: 256
+nb_hidden: 2
+
+# Training configuration
+epochs: 20
+batch_size: 256
+lr: 0.001
+device: mps             # options: "cpu", "mps", "cuda"
+
 
 # for the simple mlp
 

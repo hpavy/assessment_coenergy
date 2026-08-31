@@ -19,7 +19,12 @@ if __name__ == "__main__":
         data, config.val_rate, config.test_rate, seed=config.seed
     )
 
-    model = load_model(config)
+    model = load_model(
+        input_dim=dataset_train[0][0].flatten().shape[0],
+        n_outputs=len(dataset_train[0][1]),
+        config=config
+        )
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
     try:
         model_dict = train_loop(model, dataset_train, dataset_val, optimizer, config)

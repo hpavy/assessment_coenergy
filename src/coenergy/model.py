@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 def load_model(config: Box, input_dim: int, n_outputs: int) -> nn.Module:
-    if config.model == "simple_mlp":
+    if config.model_type == "mlp":
         return SimpleMLP(
             input_dim,
             n_outputs,
